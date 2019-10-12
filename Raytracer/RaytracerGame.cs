@@ -47,7 +47,7 @@ namespace Raytracer
             using var serviceProvider = collection.BuildServiceProvider();
 
             var tracingOptions = serviceProvider.GetRequiredService<ITracingOptions>();
-            tracingOptions.ReflectionLimit = 0;
+            tracingOptions.ReflectionLimit = 4;
             tracingOptions.SampleCount = 1;
 
             foreach (var c in serviceProvider.GetRequiredService<IEnumerable<IGameComponent>>())

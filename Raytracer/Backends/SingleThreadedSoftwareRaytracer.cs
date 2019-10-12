@@ -28,7 +28,7 @@ namespace Raytracer.Backends
                     Vector3 color = Vector3.Zero;
                     for (int i = 0; i < tracingOptions.SampleCount; i++)
                     {
-                        var c = GetColorVectorForRay(ray, tracingOptions);
+                        var c = GetColorVectorForRay(ray, tracingOptions, 0);
                         c = Vector3.Clamp(c, Vector3.Zero, Vector3.One);
                         color += c;
                     }
@@ -42,7 +42,7 @@ namespace Raytracer.Backends
             renderTarget.SetData(_buffer);
         }
 
-        private Vector3 GetColorVectorForRay(Ray ray, ITracingOptions tracingOptions)
+        private Vector3 GetColorVectorForRay(Ray ray, ITracingOptions tracingOptions, int depth)
         {
             var ix = CheckIntersection(ray, tracingOptions.Scene);
             if (!ix.HasValue)
@@ -54,7 +54,23 @@ namespace Raytracer.Backends
 
             var color = CalculateNaturalColor(intersectionLocation, intersectionNormal, tracingOptions, intersection.IntersectedObject.Surface);
 
-            return color;
+            if (depth >= tracingOptions.ReflectionLimit)
+            {
+                return color * Vector3.One / 2f;
+            }
+            var reflectionDir = ray.Direction - 2 * Vector3.Dot(intersectionNormal, ray.Direction) * intersectionNormal;
+            return color + GetReflectionColor(intersection.IntersectedObject.Surface, intersectionLocation, reflectionDir, tracingOptions, depth + 1);
+        }
+
+        private Vector3 GetReflectionColor(
+            ISurface surface,
+            Vector3 position,
+            Vector3 reflectionDir,
+            ITracingOptions tracingOptions,
+            int depth)
+        {
+            var ray = new Ray(position + reflectionDir * 0.001f, reflectionDir);
+            return surface.Reflect(position) * GetColorVectorForRay(ray, tracingOptions, depth + 1);
         }
 
         private Vector3 CalculateNaturalColor(

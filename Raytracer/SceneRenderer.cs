@@ -2,6 +2,7 @@
 using Microsoft.Xna.Framework.Graphics;
 using Raytracer.Components;
 using Raytracer.Scene;
+using Raytracer.Scene.Camera;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -18,11 +19,13 @@ namespace Raytracer
 
         private RenderTarget2D? _renderTarget;
         private bool _initialDraw = true;
+        private readonly ICamera _camera;
 
         public SceneRenderer(
             Game game,
             PerformanceEvaluator performanceEvaluator,
             ITracingOptions tracingOptions,
+            ICamera camera,
             IEnumerable<IRaytracer> raytracerBackends
             ) : base(game)
         {
@@ -35,6 +38,7 @@ namespace Raytracer
             _spriteBatch = new SpriteBatch(game.GraphicsDevice);
             _pixel = new Texture2D(game.GraphicsDevice, 1, 1);
             _pixel.SetData(new[] { Color.White });
+            _camera = camera;
         }
 
         public override void Update(GameTime gameTime)
@@ -89,8 +93,7 @@ namespace Raytracer
             if (!_tracingOptions.OnlyRedrawIfDirty)
                 return true;
 
-            // TODO: when implemented, respect player input
-            return false;
+            return _camera.Dirty;
         }
     }
 }

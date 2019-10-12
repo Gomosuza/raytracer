@@ -5,7 +5,7 @@ namespace Raytracer.Scene.Camera
 {
     public class FpsCamera : ICamera
     {
-        private readonly Vector3 _lookAt;
+        private Vector3 _direction;
         private readonly GraphicsDevice _graphicsDevice;
 
         public FpsCamera(
@@ -14,11 +14,15 @@ namespace Raytracer.Scene.Camera
             Vector3 lookAt)
         {
             Position = pos;
-            _lookAt = lookAt;
+            _direction = lookAt - Position;
+            _direction.Normalize();
+
             _graphicsDevice = graphicsDevice;
         }
 
-        public Vector3 Position { get; }
+        public Vector3 Position { get; private set; }
+
+        public bool Dirty { get; private set; }
 
         public Ray GetRayForRasterPosition(int x, int y, int width, int height)
         {
@@ -31,11 +35,15 @@ namespace Raytracer.Scene.Camera
             // but -1 y is down in world space but up in raster space
             var scalarOffsetY = 1f - y / (float)height * 2f;
 
-            var direction = _lookAt - Position;
-            direction.Normalize();
-            var dir = direction + scalarOffsetX * Vector3.Right + scalarOffsetY * Vector3.Up;
+            var dir = _direction + scalarOffsetX * Vector3.Right + scalarOffsetY * Vector3.Up;
             dir.Normalize();
             return new Ray(Position, dir);
+        }
+
+        public void Move(Vector3 direction)
+        {
+            Position += direction;
+            Dirty = true;
         }
     }
 }

@@ -37,7 +37,7 @@ namespace Raytracer.Scene
             foreach (var o in SceneObjects)
             {
                 var d = o.Intersects(ray);
-                if (d.HasValue)
+                if (d.HasValue && d.Value >= 0)
                     intersections.Add(new Intersection(o, d.Value));
             }
             return intersections;

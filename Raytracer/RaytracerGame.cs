@@ -1,6 +1,9 @@
-﻿using Microsoft.Xna.Framework;
+﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Raytracer.Components;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Raytracer
 {
@@ -8,8 +11,12 @@ namespace Raytracer
     {
         private readonly GraphicsDeviceManager _graphicsDeviceManager;
         private SpriteBatch _spriteBatch;
-        private Texture2D _renderTarget;
+        private RenderTarget2D _renderTarget;
         private PerformanceEvaluator _performanceEvaluator;
+        private IRaytracingBackend _selectedRaytracingBackend;
+        private IRaytracingBackend[] _raytracingBackends;
+        private TracingOptions _tracingOptions;
+        private Texture2D _pixel;
 
         public RaytracerGame()
         {
@@ -19,10 +26,33 @@ namespace Raytracer
         protected override void LoadContent()
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
+            _pixel = new Texture2D(GraphicsDevice, 1, 1);
+            _pixel.SetData(new[] { Color.White });
 
             Components.Add(_performanceEvaluator = new PerformanceEvaluator(this));
             Components.Add(new FpsCounter(this));
             Components.Add(new WindowTitle(this));
+
+            var collection = new ServiceCollection();
+            collection.Scan(scan =>
+            {
+                scan.FromAssemblyOf<IRaytracingBackend>()
+                    .AddClasses(x => x.AssignableTo<IRaytracingBackend>())
+                    .As<IRaytracingBackend>()
+                    .WithSingletonLifetime();
+            });
+
+            var serviceProvider = collection.BuildServiceProvider();
+            _raytracingBackends = serviceProvider.GetRequiredService<IEnumerable<IRaytracingBackend>>()
+                .OrderBy(x => x.Name)
+                .ToArray();
+            _selectedRaytracingBackend = _raytracingBackends.First();
+
+            _tracingOptions = new TracingOptions
+            {
+                ReflectionLimit = 0,
+                SampleCount = 1
+            };
 
             base.LoadContent();
         }
@@ -40,11 +70,7 @@ namespace Raytracer
                 _renderTarget.Width != w ||
                 _renderTarget.Height != h)
             {
-                _renderTarget = new Texture2D(GraphicsDevice, w, h);
-                var empty = new Color[w * h];
-                for (int i = 0; i < empty.Length; i++)
-                    empty[i] = Color.Purple;
-                _renderTarget.SetData(empty);
+                _renderTarget = new RenderTarget2D(GraphicsDevice, w, h);
             }
         }
 
@@ -56,7 +82,19 @@ namespace Raytracer
             if (_renderTarget == null)
                 return;
 
+            // fill rendertarget so we can see if tracing did not fill entirely
+            GraphicsDevice.SetRenderTarget(_renderTarget);
             _spriteBatch.Begin();
+            _spriteBatch.Draw(_pixel, _renderTarget.Bounds, Color.Purple);
+            _spriteBatch.End();
+            GraphicsDevice.SetRenderTarget(null);
+
+            // raytrace
+            _selectedRaytracingBackend.Draw(_tracingOptions, _renderTarget, gameTime);
+
+            GraphicsDevice.SetRenderTarget(null);
+            // simply upscale rendertarget to screen to draw scene
+            _spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp);
             _spriteBatch.Draw(_renderTarget, GraphicsDevice.Viewport.Bounds, Color.White);
             _spriteBatch.End();
         }

@@ -24,7 +24,7 @@ namespace Raytracer.Components
         /// The (user set) Fps to hit.
         /// If not sustainable at the provided resolution, resolution will be lowered until it is met.
         /// </summary>
-        public int TargetFps { get; set; } = 60;
+        public int TargetFps { get; set; } = 55;
 
         public int Width { get; private set; }
 

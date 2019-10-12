@@ -12,6 +12,7 @@ pool:
 variables:
   BuildConfiguration: 'Release'
   PublishProject: Raytracer
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 
 steps:
 - checkout: self

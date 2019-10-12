@@ -43,11 +43,41 @@ namespace Raytracer.Backends
 
         private Vector3 GetColorVectorForRay(Ray ray, ITracingOptions tracingOptions)
         {
-            var intersection = CheckIntersection(ray, tracingOptions.Scene);
-            if (!intersection.HasValue)
+            var ix = CheckIntersection(ray, tracingOptions.Scene);
+            if (!ix.HasValue)
                 return Vector3.Zero;
 
-            return intersection.Value.IntersectedObject.Surface.Diffuse(Vector3.Zero);
+            var intersection = ix.Value;
+            var intersectionLocation = ray.Position + ray.Direction * intersection.Distance;
+
+            var color = CalculateNaturalColor(intersectionLocation, tracingOptions, intersection.IntersectedObject.Surface);
+
+            return color;
+        }
+
+        private Vector3 CalculateNaturalColor(Vector3 position, ITracingOptions tracingOptions, ISurface surface)
+        {
+            var color = Vector3.Zero;
+            foreach (var light in tracingOptions.Scene.Lights)
+            {
+                var lightDistance = light.Position - position;
+                var lightDir = Vector3.Normalize(lightDistance);
+
+                // check if light source is reachable from current position or not
+                // must move away from object slightly, otherwise collision will be current point
+                var ray = new Ray(position + lightDir * 0.001f, lightDir);
+                var ix = CheckIntersection(ray, tracingOptions.Scene);
+                if (ix.HasValue)
+                {
+                    var intersection = ix.Value;
+                    var isInShadow = intersection.Distance * intersection.Distance < lightDistance.LengthSquared();
+                    if (isInShadow)
+                        continue;
+                }
+
+                color += surface.Diffuse(Vector3.Zero);
+            }
+            return color;
         }
 
         private Intersection? CheckIntersection(Ray ray, IScene scene)

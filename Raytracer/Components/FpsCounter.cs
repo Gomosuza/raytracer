@@ -12,7 +12,6 @@ namespace Raytracer.Components
         private TimeSpan _elapsedTime;
         private static readonly TimeSpan _oneSecond = TimeSpan.FromSeconds(1);
         private int _fpsInsertIndex;
-        private int _avgFps;
 
         public FpsCounter(
             Game game,
@@ -22,7 +21,7 @@ namespace Raytracer.Components
             _recentFpsCounts = new int[lastNSecondsToMonitor];
         }
 
-        public int CurrentFps => _avgFps;
+        public int CurrentFps { get; private set; }
 
         public override void Update(GameTime gameTime)
         {
@@ -36,7 +35,7 @@ namespace Raytracer.Components
                 _fpsCount = 0;
                 _fpsInsertIndex = (_fpsInsertIndex + 1) % _recentFpsCounts.Length;
                 // initially values are empty, so don't include in avg
-                _avgFps = (int)Math.Round(_recentFpsCounts.TakeWhile(x => x > 0).Average());
+                CurrentFps = (int)Math.Round(_recentFpsCounts.TakeWhile(x => x > 0).Average());
             }
         }
 

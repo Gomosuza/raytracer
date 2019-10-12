@@ -33,14 +33,14 @@ namespace Raytracer
 
             collection.Scan(scan =>
             {
-                scan.FromAssemblyOf<IRaytracer>()
-                    .AddClasses(x => x.AssignableTo<IRaytracer>())
-                    .As<IRaytracer>()
-                    .WithSingletonLifetime()
-                    .AddClasses(x => x.AssignableTo<GameComponent>())
-                    .As<GameComponent>()
-                    .AsSelf()
-                    .WithSingletonLifetime();
+                scan
+                .FromAssemblyOf<IRaytracer>()
+                .AddClasses(x => x.AssignableTo<IRaytracer>())
+                .As<IRaytracer>()
+                .WithSingletonLifetime()
+                .AddClasses(x => x.AssignableTo<GameComponent>())
+                .AsSelfWithInterfaces()
+                .WithSingletonLifetime();
             });
 
             using var serviceProvider = collection.BuildServiceProvider();
@@ -49,7 +49,7 @@ namespace Raytracer
             tracingOptions.ReflectionLimit = 0;
             tracingOptions.SampleCount = 1;
 
-            foreach (var c in serviceProvider.GetRequiredService<IEnumerable<GameComponent>>())
+            foreach (var c in serviceProvider.GetRequiredService<IEnumerable<IGameComponent>>())
                 Components.Add(c);
         }
 

@@ -6,7 +6,7 @@ namespace Raytracer
     /// <summary>
     /// Interface for raytracing implementations.
     /// </summary>
-    public interface IRaytracingBackend
+    public interface IRaytracer
     {
         /// <summary>
         /// User friendly name.
@@ -21,9 +21,9 @@ namespace Raytracer
         /// <summary>
         /// When called must perform a full trace and store the output in the rendertarget.
         /// </summary>
-        /// <param name="tracingOptions"></param>
         /// <param name="renderTarget"></param>
+        /// <param name="tracingOptions"></param>
         /// <param name="gameTime"></param>
-        void Draw(TracingOptions tracingOptions, RenderTarget2D renderTarget, GameTime gameTime);
+        void Draw(RenderTarget2D renderTarget, ITracingOptions tracingOptions, GameTime gameTime);
     }
 }

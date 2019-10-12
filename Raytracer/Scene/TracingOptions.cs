@@ -14,6 +14,8 @@ namespace Raytracer.Scene
 
         public int SampleCount { get; set; } = 1;
 
+        public bool OnlyRedrawIfDirty { get; set; }
+
         public ICamera Camera { get; }
 
         public IScene Scene { get; }

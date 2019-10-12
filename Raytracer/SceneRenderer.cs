@@ -9,13 +9,15 @@ namespace Raytracer
 {
     public class SceneRenderer : DrawableGameComponent
     {
-        private readonly IRaytracer _selectedRaytracingBackend;
-        private readonly IRaytracer[] _raytracingBackends;
-        private readonly ITracingOptions _tracingOptions;
-        private Texture2D _pixel;
-        private SpriteBatch _spriteBatch;
-        private RenderTarget2D? _renderTarget;
         private readonly PerformanceEvaluator _performanceEvaluator;
+        private readonly IRaytracer[] _raytracingBackends;
+        private readonly IRaytracer _selectedRaytracingBackend;
+        private readonly ITracingOptions _tracingOptions;
+        private readonly SpriteBatch _spriteBatch;
+        private readonly Texture2D _pixel;
+
+        private RenderTarget2D? _renderTarget;
+        private bool _initialDraw = true;
 
         public SceneRenderer(
             Game game,
@@ -49,6 +51,7 @@ namespace Raytracer
                 _renderTarget.Height != h)
             {
                 _renderTarget = new RenderTarget2D(GraphicsDevice, w, h);
+                _initialDraw = true;
             }
         }
 
@@ -59,21 +62,35 @@ namespace Raytracer
             if (_renderTarget == null)
                 return;
 
-            // fill rendertarget so we can see if tracing did not fill entirely
-            GraphicsDevice.SetRenderTarget(_renderTarget);
-            _spriteBatch.Begin();
-            _spriteBatch.Draw(_pixel, _renderTarget.Bounds, Color.Purple);
-            _spriteBatch.End();
-            GraphicsDevice.SetRenderTarget(null);
+            var dirty = HasSceneChanged();
+            if (dirty || _initialDraw)
+            {
+                _initialDraw = false;
+                // fill rendertarget so we can see if tracing did not fill entirely
+                GraphicsDevice.SetRenderTarget(_renderTarget);
+                _spriteBatch.Begin();
+                _spriteBatch.Draw(_pixel, _renderTarget.Bounds, Color.Purple);
+                _spriteBatch.End();
+                GraphicsDevice.SetRenderTarget(null);
 
-            // raytrace
-            _selectedRaytracingBackend.Draw(_renderTarget, _tracingOptions, gameTime);
+                // raytrace
+                _selectedRaytracingBackend.Draw(_renderTarget, _tracingOptions, gameTime);
+            }
 
             GraphicsDevice.SetRenderTarget(null);
             // simply upscale rendertarget to screen to draw scene
             _spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp);
             _spriteBatch.Draw(_renderTarget, GraphicsDevice.Viewport.Bounds, Color.White);
             _spriteBatch.End();
+        }
+
+        private bool HasSceneChanged()
+        {
+            if (!_tracingOptions.OnlyRedrawIfDirty)
+                return true;
+
+            // TODO: when implemented, respect player input
+            return false;
         }
     }
 }

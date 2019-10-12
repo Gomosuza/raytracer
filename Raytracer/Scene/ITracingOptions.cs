@@ -16,6 +16,12 @@ namespace Raytracer.Scene
         /// </summary>
         int SampleCount { get; set; }
 
+        /// <summary>
+        /// If true, no redraw is performed when the scene didn't change.
+        /// (E.g. when no user input occurs).
+        /// </summary>
+        bool OnlyRedrawIfDirty { get; set; }
+
         ICamera Camera { get; }
 
         IScene Scene { get; }

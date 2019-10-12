@@ -59,6 +59,8 @@ namespace Raytracer
             var descriptor = new SceneDescriptor();
 
             descriptor.Add(new Sphere(Vector3.Zero, 2, new SolidColorSurface(Color.Red)));
+            descriptor.Add(new Sphere(new Vector3(2, 1, 0), 1, new SolidColorSurface(Color.Blue)));
+            descriptor.Add(new Sphere(new Vector3(-2, 1.5f, -2), 0.75f, new SolidColorSurface(Color.Green)));
             return descriptor;
         }
 

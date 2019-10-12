@@ -7,7 +7,7 @@ namespace Raytracer.Backends
 {
     public class SingleThreadedSoftwareRaytracer : IRaytracer
     {
-        private Color[] _buffer;
+        private Color[]? _buffer;
 
         public string Name => "Single-threaded software raytracer";
 

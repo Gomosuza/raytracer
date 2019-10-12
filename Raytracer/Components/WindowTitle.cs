@@ -1,5 +1,4 @@
 ﻿using Microsoft.Xna.Framework;
-using System.Linq;
 
 namespace Raytracer.Components
 {
@@ -10,19 +9,20 @@ namespace Raytracer.Components
         private PerformanceEvaluator _performanceEvaluator;
         private int _lastWidth, _lastHeight;
 
-        public WindowTitle(Game game) : base(game)
+        public WindowTitle(
+            Game game,
+            FpsCounter fpsCounter,
+            PerformanceEvaluator performanceEvaluator
+            ) : base(game)
         {
+            _fpsCounter = fpsCounter;
+            _performanceEvaluator = performanceEvaluator;
         }
 
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            if (_fpsCounter == null)
-            {
-                _fpsCounter = Game.Components.OfType<FpsCounter>().First();
-                _performanceEvaluator = Game.Components.OfType<PerformanceEvaluator>().First();
-            }
             bool dirty = false;
             if (_lastFps != _fpsCounter.CurrentFps)
             {

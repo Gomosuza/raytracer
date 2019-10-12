@@ -1,6 +1,5 @@
 ﻿using Microsoft.Xna.Framework;
 using System;
-using System.Linq;
 
 namespace Raytracer.Components
 {
@@ -13,8 +12,13 @@ namespace Raytracer.Components
         private readonly TimeSpan _evalPeriod;
         private TimeSpan _passedTime;
 
-        public PerformanceEvaluator(Game game, TimeSpan? evalPeriod = null) : base(game)
+        public PerformanceEvaluator(
+            Game game,
+            FpsCounter fpsCounter,
+            TimeSpan? evalPeriod = null
+            ) : base(game)
         {
+            _fpsCounter = fpsCounter;
             Width = game.GraphicsDevice.Viewport.Width;
             Height = game.GraphicsDevice.Viewport.Height;
             _evalPeriod = evalPeriod ?? TimeSpan.FromSeconds(5);
@@ -32,9 +36,6 @@ namespace Raytracer.Components
 
         public override void Update(GameTime gameTime)
         {
-            if (_fpsCounter == null)
-                _fpsCounter = Game.Components.OfType<FpsCounter>().First();
-
             _passedTime += gameTime.ElapsedGameTime;
             if (_passedTime >= _evalPeriod)
             {

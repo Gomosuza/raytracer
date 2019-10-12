@@ -14,7 +14,10 @@ namespace Raytracer.Components
         private int _fpsInsertIndex;
         private int _avgFps;
 
-        public FpsCounter(Game game, int lastNSecondsToMonitor = 5) : base(game)
+        public FpsCounter(
+            Game game,
+            int lastNSecondsToMonitor = 5
+            ) : base(game)
         {
             _recentFpsCounts = new int[lastNSecondsToMonitor];
         }

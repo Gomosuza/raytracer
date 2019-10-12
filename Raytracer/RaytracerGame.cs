@@ -63,7 +63,7 @@ namespace Raytracer
             scene.Add(new Sphere(new Vector3(0, 2, 0), 2, new SolidColorSurface(Parse("36D215"))));
             scene.Add(new Sphere(new Vector3(3, 2, 0), 1, new SolidColorSurface(Parse("1F51A7"))));
             scene.Add(new Sphere(new Vector3(-2, 1.5f, -2), 0.75f, new SolidColorSurface(Parse("FFA86A"))));
-            scene.Add(new Light(new Vector3(0, 5, -3f), 1, Parse("FFEE3F")));
+            scene.Add(new Light(new Vector3(0, 5, -3f), 1, Parse("FAFFDB")));
             return scene;
         }
 

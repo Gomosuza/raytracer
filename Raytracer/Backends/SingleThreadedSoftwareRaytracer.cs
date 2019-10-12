@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Raytracer.Scene;
+using System;
 using System.Linq;
 
 namespace Raytracer.Backends
@@ -49,15 +50,24 @@ namespace Raytracer.Backends
 
             var intersection = ix.Value;
             var intersectionLocation = ray.Position + ray.Direction * intersection.Distance;
+            var intersectionNormal = intersection.IntersectedObject.Normal(intersectionLocation);
 
-            var color = CalculateNaturalColor(intersectionLocation, tracingOptions, intersection.IntersectedObject.Surface);
+            var color = CalculateNaturalColor(intersectionLocation, intersectionNormal, tracingOptions, intersection.IntersectedObject.Surface);
 
             return color;
         }
 
-        private Vector3 CalculateNaturalColor(Vector3 position, ITracingOptions tracingOptions, ISurface surface)
+        private Vector3 CalculateNaturalColor(
+            Vector3 position,
+            Vector3 intersectionNormal,
+            ITracingOptions tracingOptions,
+            ISurface surface)
         {
-            var color = Vector3.Zero;
+            // use Phong shading model to determine color
+            // https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model
+
+            // use minimal ambient
+            var color = new Vector3(0.01f);
             foreach (var light in tracingOptions.Scene.Lights)
             {
                 var lightDistance = light.Position - position;
@@ -75,7 +85,12 @@ namespace Raytracer.Backends
                         continue;
                 }
 
-                color += surface.Diffuse(Vector3.Zero);
+                var illumination = MathHelper.Clamp(Vector3.Dot(lightDir, intersectionNormal), 0, float.MaxValue);
+                var c = illumination * light.Color.ToVector3() * light.Intensity;
+                color += c * surface.Diffuse(position);
+
+                var specular = MathHelper.Clamp(Vector3.Dot(lightDir, intersectionNormal), 0, float.MaxValue);
+                color += specular * c * (float)Math.Pow(specular, surface.Shininess) * surface.Specular(position);
             }
             return color;
         }

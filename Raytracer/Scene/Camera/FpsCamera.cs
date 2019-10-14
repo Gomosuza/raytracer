@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Raytracer.Configuration;
 
 namespace Raytracer.Scene.Camera
 {
@@ -9,13 +10,16 @@ namespace Raytracer.Scene.Camera
         private readonly Vector3 _initialDirection;
         private Vector3 _direction;
         private float _horizontalRotation, _verticalRotation;
+        private readonly Settings _settings;
 
         public FpsCamera(
             GraphicsDevice graphicsDevice,
+            Settings settings,
             Vector3 pos,
             Vector3 initialDirection)
         {
             _graphicsDevice = graphicsDevice;
+            _settings = settings;
             Position = pos;
             _direction = _initialDirection = Vector3.Normalize(initialDirection);
         }
@@ -32,6 +36,7 @@ namespace Raytracer.Scene.Camera
 
         public Ray GetRayForRasterPosition(int x, int y, int width, int height)
         {
+            var fov = _settings.Scene.Fov;
             // x is in range 0 - width, we need it to be -1 to 1
             // y is in range 0 - height, we need it to be -1 to 1
             var scalarOffsetX = -1f + x / (float)width * 2f;

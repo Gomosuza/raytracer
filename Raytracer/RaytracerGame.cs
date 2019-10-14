@@ -1,6 +1,7 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Raytracer.Configuration;
 using Raytracer.Scene;
 using Raytracer.Scene.Camera;
 using Raytracer.Scene.Objects;
@@ -13,10 +14,16 @@ namespace Raytracer
     public class RaytracerGame : Game
     {
         private readonly GraphicsDeviceManager _graphicsDeviceManager;
+        private readonly Settings _settings;
 
-        public RaytracerGame()
+        public RaytracerGame(Settings settings)
         {
-            _graphicsDeviceManager = new GraphicsDeviceManager(this);
+            _settings = settings;
+            _graphicsDeviceManager = new GraphicsDeviceManager(this)
+            {
+                PreferredBackBufferWidth = _settings.Video.Width,
+                PreferredBackBufferHeight = _settings.Video.Height
+            };
         }
 
         protected override void Initialize()
@@ -25,11 +32,13 @@ namespace Raytracer
 
             var collection = new ServiceCollection();
             collection.AddSingleton<Game>(this);
+            collection.AddSingleton(_settings);
             collection.AddSingleton(_graphicsDeviceManager);
+            collection.AddSingleton(GraphicsDevice);
             collection.AddSingleton<IGraphicsDeviceManager>(_graphicsDeviceManager);
             collection.AddSingleton<IGraphicsDeviceService>(_graphicsDeviceManager);
             collection.AddSingleton<ITracingOptions, TracingOptions>();
-            collection.AddSingleton<ICamera>(new FpsCamera(GraphicsDevice, new Vector3(0, 2, -5f), new Vector3(0, 0, 1)));
+            collection.AddSingleton<ICamera>(sp => new FpsCamera(GraphicsDevice, sp.GetRequiredService<Settings>(), new Vector3(0, 2, -5f), new Vector3(0, 0, 1)));
             collection.AddSingleton(LoadScene());
 
             collection.Scan(scan =>
@@ -45,11 +54,6 @@ namespace Raytracer
             });
 
             using var serviceProvider = collection.BuildServiceProvider();
-
-            var tracingOptions = serviceProvider.GetRequiredService<ITracingOptions>();
-            tracingOptions.ReflectionLimit = 4;
-            tracingOptions.SampleCount = 4;
-            tracingOptions.OnlyRedrawIfDirty = true;
 
             foreach (var c in serviceProvider.GetRequiredService<IEnumerable<IGameComponent>>())
                 Components.Add(c);

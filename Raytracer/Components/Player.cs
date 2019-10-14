@@ -1,24 +1,31 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
+using Raytracer.Configuration;
+using Raytracer.Input;
 using Raytracer.Scene.Camera;
 
 namespace Raytracer.Components
 {
     public class Player : GameComponent
     {
-        private KeyboardState _previousState, _currentState;
         private MouseState _previousMouseState, _currentMouseState;
         private readonly ICamera _camera;
         private readonly float _movementSpeed;
+        private readonly IActionKeyMap _actionKeyMap;
+        private readonly Settings _settings;
 
         public Player(
             Game game,
             ICamera camera,
+            IActionKeyMap actionKeyMap,
+            Settings settings,
             float movementSpeed = 1f
             ) : base(game)
         {
             _camera = camera;
             _movementSpeed = movementSpeed;
+            _actionKeyMap = actionKeyMap;
+            _settings = settings;
         }
 
         public override void Initialize()
@@ -26,7 +33,6 @@ namespace Raytracer.Components
             base.Initialize();
             CenterMouse();
             _previousMouseState = _currentMouseState = Mouse.GetState();
-            _previousState = _currentState = Keyboard.GetState();
         }
 
         public override void Update(GameTime gameTime)
@@ -37,31 +43,27 @@ namespace Raytracer.Components
                 return;
 
             _currentMouseState = Mouse.GetState();
-            _currentState = Keyboard.GetState();
 
             Exit();
             Rotate(gameTime);
             Move(gameTime);
-
-            _previousState = _currentState;
         }
 
         private void Exit()
         {
-            if (IsPressed(Keys.Escape))
+            if (_actionKeyMap.IsPressed(nameof(InputAction.Exit)))
                 Game.Exit();
         }
 
         private void Rotate(GameTime gameTime)
         {
             var delta = _currentMouseState.Position - _previousMouseState.Position;
-            var x = delta.X;
-            var y = delta.Y;
+            var x = delta.X * (_settings.Mouse.InvertXAxis ? -1 : 1);
+            var y = delta.Y * (_settings.Mouse.InvertYAxis ? -1 : 1);
             if (x == 0 && y == 0)
                 return;
 
-            const float mouseSpeed = 0.1f;
-            _camera.Rotate(x * mouseSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds, y * mouseSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
+            _camera.Rotate(x * _settings.Mouse.SensitivityX * (float)gameTime.ElapsedGameTime.TotalSeconds, y * _settings.Mouse.SensitivityY * (float)gameTime.ElapsedGameTime.TotalSeconds);
 
             CenterMouse();
             _previousMouseState = Mouse.GetState();
@@ -73,26 +75,27 @@ namespace Raytracer.Components
         private void Move(GameTime gameTime)
         {
             var movement = Vector3.Zero;
-            if (IsPressed(Keys.W))
+            if (IsPressed(nameof(InputAction.Forward)))
                 movement += Vector3.UnitZ;
-            if (IsPressed(Keys.S))
+            if (IsPressed(nameof(InputAction.Backward)))
                 movement -= Vector3.UnitZ;
 
-            if (IsPressed(Keys.A))
+            if (IsPressed(nameof(InputAction.Left)))
                 movement -= Vector3.UnitX;
-            if (IsPressed(Keys.D))
+            if (IsPressed(nameof(InputAction.Right)))
                 movement += Vector3.UnitX;
 
-            if (IsPressed(Keys.Space))
+            if (IsPressed(nameof(InputAction.Up)))
                 movement += Vector3.UnitY;
-            if (IsPressed(Keys.LeftShift))
+            if (IsPressed(nameof(InputAction.Down)))
                 movement -= Vector3.UnitY;
 
+            var movementSpeed = _movementSpeed * (IsPressed(nameof(InputAction.Sprint)) ? 3 : 1);
             if (movement != Vector3.Zero)
-                _camera.Move(Vector3.Normalize(movement) * _movementSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
+                _camera.Move(Vector3.Normalize(movement) * movementSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
         }
 
-        private bool IsPressed(Keys k)
-            => _currentState.IsKeyDown(k);
+        private bool IsPressed(string action)
+            => _actionKeyMap.IsPressed(action);
     }
 }

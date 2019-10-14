@@ -15,3 +15,13 @@ TODO:
 Each implementation uses the same logic to determine resolution:
 
 Given a resolution it will attempt to hit the configured FPS target (default: 60 FPS), failing to do so it will half the resolution.
+
+# Features
+
+* configuration options (currently limited to file/command line based at startup)
+
+TODO:
+
+* load scene from file
+* performance test
+* GUI

@@ -1,7 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using Raytracer.Scene.Camera;
-using System;
 
 namespace Raytracer.Components
 {
@@ -22,19 +21,57 @@ namespace Raytracer.Components
             _movementSpeed = movementSpeed;
         }
 
+        public override void Initialize()
+        {
+            base.Initialize();
+            CenterMouse();
+            _previousMouseState = _currentMouseState = Mouse.GetState();
+            _previousState = _currentState = Keyboard.GetState();
+        }
+
         public override void Update(GameTime gameTime)
         {
             base.Update(gameTime);
 
-            _previousMouseState = _currentMouseState;
-            _previousState = _currentState;
+            if (!Game.IsActive)
+                return;
 
             _currentMouseState = Mouse.GetState();
             _currentState = Keyboard.GetState();
 
+            Exit();
+            Rotate(gameTime);
+            Move(gameTime);
+
+            _previousState = _currentState;
+        }
+
+        private void Exit()
+        {
             if (IsPressed(Keys.Escape))
                 Game.Exit();
+        }
 
+        private void Rotate(GameTime gameTime)
+        {
+            var delta = _currentMouseState.Position - _previousMouseState.Position;
+            var x = delta.X;
+            var y = delta.Y;
+            if (x == 0 && y == 0)
+                return;
+
+            const float mouseSpeed = 0.1f;
+            _camera.Rotate(x * mouseSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds, y * mouseSpeed * (float)gameTime.ElapsedGameTime.TotalSeconds);
+
+            CenterMouse();
+            _previousMouseState = Mouse.GetState();
+        }
+
+        private void CenterMouse()
+            => Mouse.SetPosition(Game.GraphicsDevice.Viewport.Width / 2, Game.GraphicsDevice.Viewport.Height / 2);
+
+        private void Move(GameTime gameTime)
+        {
             var movement = Vector3.Zero;
             if (IsPressed(Keys.W))
                 movement += Vector3.UnitZ;

@@ -93,7 +93,7 @@ namespace Raytracer
             if (!_tracingOptions.OnlyRedrawIfDirty)
                 return true;
 
-            return _camera.Dirty;
+            return _camera.IsDirty;
         }
     }
 }

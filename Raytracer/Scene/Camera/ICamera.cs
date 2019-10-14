@@ -10,7 +10,7 @@ namespace Raytracer.Scene.Camera
         /// Indicates when a camera value has changed.
         /// This usually requires the scene to be redrawn.
         /// </summary>
-        bool Dirty { get; }
+        bool IsDirty { get; }
 
         /// <summary>
         /// Given a screen of size width*height this will return slightly rotated rays for each x/y combination.
@@ -18,5 +18,7 @@ namespace Raytracer.Scene.Camera
         Ray GetRayForRasterPosition(int x, int y, int width, int height);
 
         void Move(Vector3 direction);
+
+        void Rotate(float x, float y);
     }
 }

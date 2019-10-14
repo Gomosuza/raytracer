@@ -5,45 +5,66 @@ namespace Raytracer.Scene.Camera
 {
     public class FpsCamera : ICamera
     {
-        private Vector3 _direction;
         private readonly GraphicsDevice _graphicsDevice;
+        private readonly Vector3 _initialDirection;
+        private Vector3 _direction;
+        private float _horizontalRotation, _verticalRotation;
 
         public FpsCamera(
             GraphicsDevice graphicsDevice,
             Vector3 pos,
-            Vector3 lookAt)
+            Vector3 initialDirection)
         {
-            Position = pos;
-            _direction = lookAt - Position;
-            _direction.Normalize();
-
             _graphicsDevice = graphicsDevice;
+            Position = pos;
+            _direction = _initialDirection = Vector3.Normalize(initialDirection);
         }
 
         public Vector3 Position { get; private set; }
 
-        public bool Dirty { get; private set; }
+        public bool IsDirty { get; private set; }
+
+        private Vector3 Up
+            => Vector3.Normalize(Vector3.Cross(_direction, Right));
+
+        private Vector3 Right
+            => Vector3.Normalize(Vector3.Cross(Vector3.Up, _direction)) * _graphicsDevice.Viewport.AspectRatio;
 
         public Ray GetRayForRasterPosition(int x, int y, int width, int height)
         {
             // x is in range 0 - width, we need it to be -1 to 1
             // y is in range 0 - height, we need it to be -1 to 1
-            // also consider aspectRatio to prevent view distortion
-            var aspectRatio = _graphicsDevice.Viewport.AspectRatio;
-            var scalarOffsetX = (-1f + x / (float)width * 2f) * aspectRatio;
+            var scalarOffsetX = -1f + x / (float)width * 2f;
             // needs to be the inverse of x since x is left to right both in world and raster space
             // but -1 y is down in world space but up in raster space
             var scalarOffsetY = 1f - y / (float)height * 2f;
 
-            var dir = _direction + scalarOffsetX * Vector3.Right + scalarOffsetY * Vector3.Up;
+            var dir = _direction + scalarOffsetX * Right + scalarOffsetY * Up;
             dir.Normalize();
             return new Ray(Position, dir);
         }
 
         public void Move(Vector3 direction)
         {
-            Position += direction;
-            Dirty = true;
+            if (direction == Vector3.Zero)
+                return;
+
+            Position += Right * direction.X;
+            Position += Up * direction.Y;
+            Position += _direction * direction.Z;
+            IsDirty = true;
+        }
+
+        public void Rotate(float x, float y)
+        {
+            if (x == 0 && y == 0)
+                return;
+
+            _horizontalRotation += x;
+            _verticalRotation = MathHelper.Clamp(_verticalRotation + y, -MathHelper.PiOver2 + 0.0001f, MathHelper.PiOver2 - 0.0001f);
+
+            _direction = Vector3.Transform(_initialDirection, Matrix.CreateRotationX(_verticalRotation) * Matrix.CreateRotationY(_horizontalRotation));
+            IsDirty = true;
         }
     }
 }

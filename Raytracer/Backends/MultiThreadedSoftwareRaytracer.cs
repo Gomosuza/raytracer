@@ -20,12 +20,13 @@ namespace Raytracer.Backends
                 _buffer.Length != renderTarget.Width * renderTarget.Height)
                 _buffer = new Color[renderTarget.Width * renderTarget.Height];
 
-            var r = Parallel.For(0, renderTarget.Width * renderTarget.Height, i =>
+            var r = Parallel.For(0, renderTarget.Height, y =>
             {
-                var x = i % renderTarget.Width;
-                var y = i / renderTarget.Width;
-                var ray = tracingOptions.Camera.GetRayForRasterPosition(x, y, renderTarget.Width - 1, renderTarget.Height - 1);
-                _buffer[x + y * renderTarget.Width] = CastRay(ray, tracingOptions);
+                for (int x = 0; x < renderTarget.Width; x++)
+                {
+                    var ray = tracingOptions.Camera.GetRayForRasterPosition(x, y, renderTarget.Width - 1, renderTarget.Height - 1);
+                    _buffer[x + y * renderTarget.Width] = CastRay(ray, tracingOptions);
+                }
             });
             if (!r.IsCompleted)
                 throw new NotSupportedException("Parallel loop must always complete");

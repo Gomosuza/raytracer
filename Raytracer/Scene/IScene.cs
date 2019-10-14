@@ -13,6 +13,6 @@ namespace Raytracer.Scene
 
         void Add(ILight light);
 
-        IReadOnlyList<Intersection> GetIntersections(Ray ray);
+        Intersection? GetClosestIntersection(Ray ray);
     }
 }

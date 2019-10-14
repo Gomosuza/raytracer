@@ -2,12 +2,13 @@
 using Microsoft.Xna.Framework.Graphics;
 using Raytracer.Scene;
 using System;
-using System.Linq;
 
 namespace Raytracer.Backends
 {
     public abstract class SoftwareRaytracerBase : IRaytracer
     {
+        private readonly Random _random = new Random();
+
         public abstract string Name { get; }
         public abstract string Description { get; }
 
@@ -18,7 +19,7 @@ namespace Raytracer.Backends
             Vector3 color = Vector3.Zero;
             for (int i = 0; i < tracingOptions.SampleCount; i++)
             {
-                var c = GetColorVectorForRay(ray, tracingOptions, 0);
+                var c = GetColorVectorForRay(ray, tracingOptions, 0, i);
                 c = Vector3.Clamp(c, Vector3.Zero, Vector3.One);
                 color += c;
             }
@@ -26,7 +27,7 @@ namespace Raytracer.Backends
             return new Color(color);
         }
 
-        private Vector3 GetColorVectorForRay(Ray ray, ITracingOptions tracingOptions, int depth)
+        private Vector3 GetColorVectorForRay(Ray ray, ITracingOptions tracingOptions, int depth, int sampleIndex)
         {
             var ix = CheckIntersection(ray, tracingOptions.Scene);
             if (!ix.HasValue)
@@ -36,14 +37,15 @@ namespace Raytracer.Backends
             var intersectionLocation = ray.Position + ray.Direction * intersection.Distance;
             var intersectionNormal = intersection.IntersectedObject.Normal(intersectionLocation);
 
-            var color = CalculateNaturalColor(intersectionLocation, intersectionNormal, tracingOptions, intersection.IntersectedObject.Surface);
+            var color = CalculateNaturalColor(intersectionLocation, intersectionNormal, tracingOptions, intersection.IntersectedObject.Surface, sampleIndex);
 
             if (depth >= tracingOptions.ReflectionLimit)
             {
                 return color * Vector3.One / 2f;
             }
+            // TODO: make feature of surface
             var reflectionDir = ray.Direction - 2 * Vector3.Dot(intersectionNormal, ray.Direction) * intersectionNormal;
-            return color + GetReflectionColor(intersection.IntersectedObject.Surface, intersectionLocation, reflectionDir, tracingOptions, depth + 1);
+            return color + GetReflectionColor(intersection.IntersectedObject.Surface, intersectionLocation, reflectionDir, tracingOptions, depth + 1, sampleIndex);
         }
 
         private Vector3 GetReflectionColor(
@@ -51,17 +53,19 @@ namespace Raytracer.Backends
             Vector3 position,
             Vector3 reflectionDir,
             ITracingOptions tracingOptions,
-            int depth)
+            int depth,
+            int sampleIndex)
         {
             var ray = new Ray(position + reflectionDir * 0.001f, reflectionDir);
-            return surface.Reflect(position) * GetColorVectorForRay(ray, tracingOptions, depth + 1);
+            return surface.Reflect(position) * GetColorVectorForRay(ray, tracingOptions, depth + 1, sampleIndex);
         }
 
         private Vector3 CalculateNaturalColor(
             Vector3 position,
             Vector3 intersectionNormal,
             ITracingOptions tracingOptions,
-            ISurface surface)
+            ISurface surface,
+            int sampleIndex)
         {
             // use Phong shading model to determine color
             // https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model
@@ -70,7 +74,15 @@ namespace Raytracer.Backends
             var color = new Vector3(0.01f);
             foreach (var light in tracingOptions.Scene.Lights)
             {
-                var lightDistance = light.Position - position;
+                var offset = Vector3.Zero;
+                if (sampleIndex > 0)
+                {
+                    const float offsetFactor = 0.1f;
+                    offset = new Vector3(-offsetFactor + offsetFactor * 2 * (float)_random.NextDouble(),
+                                         -offsetFactor + offsetFactor * 2 * (float)_random.NextDouble(),
+                                         -offsetFactor + offsetFactor * 2 * (float)_random.NextDouble());
+                }
+                var lightDistance = light.Position + offset - position;
                 var lightDir = Vector3.Normalize(lightDistance);
 
                 // check if light source is reachable from current position or not
@@ -96,12 +108,6 @@ namespace Raytracer.Backends
         }
 
         private Intersection? CheckIntersection(Ray ray, IScene scene)
-        {
-            var intersections = scene.GetIntersections(ray);
-            if (intersections.Count == 0)
-                return null;
-
-            return intersections.OrderBy(x => x.Distance).First();
-        }
+            => scene.GetClosestIntersection(ray);
     }
 }

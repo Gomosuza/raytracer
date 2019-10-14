@@ -31,16 +31,23 @@ namespace Raytracer.Scene
             _lights.Add(light);
         }
 
-        public IReadOnlyList<Intersection> GetIntersections(Ray ray)
+        public Intersection? GetClosestIntersection(Ray ray)
         {
-            var intersections = new List<Intersection>();
+            Intersection? intersection = null;
+            float min = float.MaxValue;
             foreach (var o in SceneObjects)
             {
                 var d = o.Intersects(ray);
-                if (d.HasValue && d.Value >= 0)
-                    intersections.Add(new Intersection(o, d.Value));
+                if (d.HasValue && d.Value >= 0 && d.Value < min)
+                {
+                    min = d.Value;
+                    intersection = new Intersection(o, d.Value);
+                }
             }
-            return intersections;
+            if (min == float.MaxValue)
+                return null;
+
+            return intersection;
         }
     }
 }

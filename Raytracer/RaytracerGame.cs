@@ -48,7 +48,8 @@ namespace Raytracer
 
             var tracingOptions = serviceProvider.GetRequiredService<ITracingOptions>();
             tracingOptions.ReflectionLimit = 4;
-            tracingOptions.SampleCount = 1;
+            tracingOptions.SampleCount = 4;
+            tracingOptions.OnlyRedrawIfDirty = true;
 
             foreach (var c in serviceProvider.GetRequiredService<IEnumerable<IGameComponent>>())
                 Components.Add(c);

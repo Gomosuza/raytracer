@@ -59,6 +59,7 @@ namespace Raytracer.Components
                 else if (_fpsCounter.CurrentFps > TargetFps * 2)
                 {
                     // performance target exceeded. increase res
+                    // TODO: also upscale if player input is stopped
                     Width *= 2;
                     Height *= 2;
                 }

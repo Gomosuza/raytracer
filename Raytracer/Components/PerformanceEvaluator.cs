@@ -50,13 +50,16 @@ namespace Raytracer.Components
             {
                 _passedTime -= _evalPeriod;
 
-                if (_fpsCounter.CurrentFps < TargetFps)
+                // allow for slight variance
+                if (_fpsCounter.CurrentFps < TargetFps * 0.9)
                 {
                     // performance target not hit. half res
                     Width /= 2;
                     Height /= 2;
                 }
-                else if (_fpsCounter.CurrentFps > TargetFps * 2)
+                // upscale if perf is fine
+                // TODO: locked at 60fps..
+                else if (_fpsCounter.CurrentFps > TargetFps * 1.66)
                 {
                     // performance target exceeded. increase res
                     // TODO: also upscale if player input is stopped

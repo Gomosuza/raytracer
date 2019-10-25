@@ -44,15 +44,8 @@ namespace Raytracer.Components
 
             _currentMouseState = Mouse.GetState();
 
-            Exit();
             Rotate(gameTime);
             Move(gameTime);
-        }
-
-        private void Exit()
-        {
-            if (_actionKeyMap.IsPressed(nameof(InputAction.Exit)))
-                Game.Exit();
         }
 
         private void Rotate(GameTime gameTime)

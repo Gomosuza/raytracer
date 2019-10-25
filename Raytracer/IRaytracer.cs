@@ -19,6 +19,8 @@ namespace Raytracer
         /// </summary>
         string Description { get; }
 
+        RenderTarget2D ChangeSize(int newWidth, int newHeight);
+
         /// <summary>
         /// When called must perform a full trace and store the output in the rendertarget.
         /// </summary>

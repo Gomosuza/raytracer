@@ -18,10 +18,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\MonoGame.Framework.ComputeShader.OpenGL\MonoGame.Framework.ComputeShader.OpenGL.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="raytracer.ini">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Update="simple.scene">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="Shaders\simple.glslcs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>

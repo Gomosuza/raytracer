@@ -14,6 +14,7 @@ There are multiple backend implementations that can be swapped out on the fly:
 
 * single-threaded software-based
 * multi-threaded software-based (same logic but makes use of multiple cores)
+* compute shader based (using the [MonoGame Core](https://www.nuget.org/packages/MonoGame.Framework.DesktopGL.Core) fork)
 
 Each implementation uses the same logic to determine resolution:
 
@@ -29,10 +30,23 @@ For CPU based tracing this behaviour can be observed at almost all (decent) reso
 * simple reflective colored surfaces
 * hard/soft shadows (`sampleCount` = 1 for hard, larger number for softer shadows)
 
+# Known issues
+
+* purple screen when using compute shader on mobile chipsets (Intel Graphics 6xx and the likes). The shader simply doesn't run/output anything resulting in the default texture color (purple) being shown
+
 TODO:
 
+* multiple surface types
 * GPU-based (vertex/pixel shader)
 * compute shader
 * load scene from file
 * GUI overlay to edit configuration values on the fly
 * performance test/tracing
+
+# Sources
+
+* [Ray tracing with OpenGL Compute Shaders ](https://github.com/LWJGL/lwjgl3-wiki/wiki/2.6.1.-Ray-tracing-with-OpenGL-Compute-Shaders-%28Part-I%29)
+* [Ray tracing in one weekend](http://in1weekend.blogspot.com/2016/01/ray-tracing-in-one-weekend.html)
+* [veldrid-raytracer](https://github.com/mellinoe/veldrid-raytracer)
+* [Paul Bourke](paulbourke.net/miscellaneous/raytracing/)
+* [ An Introduction to Compute Shaders](http://antongerdelan.net/opengl/compute.html)

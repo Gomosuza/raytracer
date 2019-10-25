@@ -8,9 +8,19 @@ namespace Raytracer.Backends
     public abstract class SoftwareRaytracerBase : IRaytracer
     {
         private readonly Random _random = new Random();
+        private readonly GraphicsDevice _graphicsDevice;
+
+        public SoftwareRaytracerBase(
+            GraphicsDevice graphicsDevice)
+        {
+            _graphicsDevice = graphicsDevice;
+        }
 
         public abstract string Name { get; }
         public abstract string Description { get; }
+
+        public RenderTarget2D ChangeSize(int newWidth, int newHeight)
+            => new RenderTarget2D(_graphicsDevice, newWidth, newHeight);
 
         public abstract void Draw(RenderTarget2D renderTarget, ITracingOptions tracingOptions, GameTime gameTime);
 

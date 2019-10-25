@@ -8,6 +8,13 @@ namespace Raytracer.Backends
     {
         private Color[]? _buffer;
 
+        public SingleThreadedSoftwareRaytracer(
+            GraphicsDevice graphicsDevice)
+            : base(graphicsDevice)
+        {
+
+        }
+
         public override string Name => "Single-threaded software raytracer";
 
         public override string Description => "For every frame will simply iterate all pixels in software and compute them. Easiest version to implement but also least performant.";

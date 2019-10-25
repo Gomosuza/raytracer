@@ -38,7 +38,10 @@ namespace Raytracer
             _performanceEvaluator = performanceEvaluator;
             _tracingOptions = tracingOptions;
             _raytracingBackends = raytracerBackends.OrderBy(x => x.Name).ToArray();
-            _selectedRaytracingBackend = _raytracingBackends.FirstOrDefault(x => x.GetType().Name.Equals(settings.Compute.Backend, StringComparison.OrdinalIgnoreCase)) ?? _raytracingBackends[0];
+            _selectedRaytracingBackend = _raytracingBackends
+                .FirstOrDefault(x => x.GetType().Name.Equals(settings.Compute.Backend, StringComparison.OrdinalIgnoreCase)) ??
+                throw new NotSupportedException($"Unsupported backend {settings.Compute.Backend} requested. " +
+                $"  Supported backends are: {string.Join(",", _raytracingBackends.Select(x => x.Name))}");
 
             _camera = camera;
             _settings = settings;
@@ -72,7 +75,7 @@ namespace Raytracer
                 _renderTarget.Width != w ||
                 _renderTarget.Height != h)
             {
-                _renderTarget = new RenderTarget2D(GraphicsDevice, w, h);
+                _renderTarget = _selectedRaytracingBackend.ChangeSize(w, h);
                 _initialDraw = true;
             }
         }
@@ -90,9 +93,7 @@ namespace Raytracer
                 _initialDraw = false;
                 // fill rendertarget so we can see if tracing did not fill entirely
                 GraphicsDevice.SetRenderTarget(_renderTarget);
-                _spriteBatch.Begin(SpriteSortMode.Immediate, null, SamplerState.PointClamp);
-                _spriteBatch.Draw(_pixel, _renderTarget.Bounds, Color.Purple);
-                _spriteBatch.End();
+                GraphicsDevice.Clear(Color.Purple);
                 GraphicsDevice.SetRenderTarget(null);
 
                 // raytrace

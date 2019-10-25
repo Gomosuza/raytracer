@@ -10,6 +10,12 @@ namespace Raytracer.Backends
     {
         private Color[]? _buffer;
 
+        public MultiThreadedSoftwareRaytracer(
+            GraphicsDevice graphicsDevice)
+            : base(graphicsDevice)
+        {
+        }
+
         public override string Name => "Multi-threaded software raytracer";
 
         public override string Description => "For every frame will compute pixels in parallel batches. Slight performance boost compared to single-threaded version but still CPU limited.";

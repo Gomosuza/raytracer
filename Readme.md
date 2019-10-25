@@ -38,10 +38,10 @@ TODO:
 
 * multiple surface types
 * GPU-based (vertex/pixel shader)
-* compute shader
 * load scene from file
 * GUI overlay to edit configuration values on the fly
 * performance test/tracing
+* use [ShaderGen](https://github.com/mellinoe/ShaderGen) to share raytracing core across compute/software shader
 
 # Sources
 
@@ -49,4 +49,4 @@ TODO:
 * [Ray tracing in one weekend](http://in1weekend.blogspot.com/2016/01/ray-tracing-in-one-weekend.html)
 * [veldrid-raytracer](https://github.com/mellinoe/veldrid-raytracer)
 * [Paul Bourke](paulbourke.net/miscellaneous/raytracing/)
-* [ An Introduction to Compute Shaders](http://antongerdelan.net/opengl/compute.html)
+* [An Introduction to Compute Shaders](http://antongerdelan.net/opengl/compute.html)

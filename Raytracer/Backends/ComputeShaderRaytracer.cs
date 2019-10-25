@@ -41,6 +41,8 @@ namespace Raytracer.Backends
             // inject parameters
             _shader.SetParameter("eye", tracingOptions.Camera.Position);
             _shader.SetParameter("direction", tracingOptions.Camera.Direction);
+            _shader.SetParameter("sampleCount", tracingOptions.SampleCount);
+            _shader.SetParameter("reflectionLimit", tracingOptions.ReflectionLimit);
 
             // hardcoded to chunks of 8x8 in compute shader
             _shader.Execute(x / 8, y / 8, 1);

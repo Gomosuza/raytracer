@@ -1,0 +1,8 @@
+﻿# simple scene format content is self descriptive
+camera (0,2,-5) (0,0,1)
+
+plane (0,1,0) 0			 surface solidcolor(A34400)
+sphere (0,2,0) 2		 surface solidcolor(36D215)
+sphere (3,2,0) 1		 surface solidcolor(1F51A7)
+sphere (-2, 1.5,-2) 0.75 surface solidcolor(1F51A7)
+sphere (0,5,-3) 1		 surface solidcolor(FAFFDB)

@@ -28,6 +28,9 @@
     <None Update="simple.scene">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+    <None Update="Shaders\raytracer.glslcs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Shaders\simple.glslcs">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

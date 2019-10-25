@@ -1,0 +1,148 @@
+﻿#version 430 core
+
+layout(binding = 0, rgba32f) uniform image2D framebuffer;
+
+uniform vec3 eye;
+uniform vec3 direction;
+
+struct object
+{
+  int type;
+
+  vec3 min;
+  vec3 max;
+  vec3 pos;
+  float radius;
+};
+#define TYPE_SPHERE 1
+#define TYPE_BOX 2
+#define PI 3.1415926
+
+#define MAX_SCENE_BOUNDS 100.0
+
+const object objects[] =
+{
+  /* floor */
+  {TYPE_BOX, vec3(-5.0, -0.01, -5.0), vec3(5.0, 0.0, 5.0), vec3(0, 0, 0), 0},
+  {TYPE_BOX, vec3(-0.5, 0.0, -0.5), vec3(0.5, 1.0, 0.5), vec3(0, 0, 0), 0},
+  {TYPE_SPHERE, vec3(0, 0, 0), vec3(0, 0, 0), vec3(2, 1, 2), 1},
+  {TYPE_SPHERE, vec3(0, 0, 0), vec3(0, 0, 0), vec3(-1, 0.5, 0), 0.5},
+};
+
+struct hitinfo
+{
+  vec2 lambda;
+  int index;
+};
+
+vec2 intersectBox(
+        /* ray */
+        vec3 origin, vec3 dir,
+        /* box */
+        const object b)
+{
+  vec3 tMin = (b.min - origin) / dir;
+  vec3 tMax = (b.max - origin) / dir;
+  vec3 t1 = min(tMin, tMax);
+  vec3 t2 = max(tMin, tMax);
+  float tNear = max(max(t1.x, t1.y), t1.z);
+  float tFar = min(min(t2.x, t2.y), t2.z);
+  return vec2(tNear, tFar);
+}
+
+float intersectSphere(
+        /* ray */
+        vec3 origin, vec3 dir,
+        /* sphere */
+        object s)
+{
+    vec3 v = s.pos - origin;
+    float lenSq = v.x*v.x + v.y*v.y + v.z*v.z;
+    float rSq = s.radius * s.radius;
+    if (lenSq < rSq)
+    {
+        // inside sphere
+        return 1.0;
+    }
+    float d = dot(dir, v);
+    if (d <= 0)
+    {
+        // sphere behind origin
+        return -1.0;
+    }
+    // check if radius + ray direction is greater than camera/sphere distance -> intersection
+    float x = rSq + d*d - lenSq;
+    if (x < 0.0)
+    {
+        return -1.0;
+    }
+    // return actual distance from camera
+    return d - sqrt(x);
+}
+
+bool intersects(vec3 origin, vec3 dir, out hitinfo info)
+{
+  float smallest = MAX_SCENE_BOUNDS;
+  bool found = false;
+  for (int i = 0; i < objects.length; i++)
+  {
+    if (objects[i].type == TYPE_BOX)
+    {
+      vec2 lambda = intersectBox(origin, dir, objects[i]);
+      if (lambda.x > 0.0 && lambda.x < lambda.y && lambda.x < smallest)
+      {
+        info.index = i;
+        smallest = lambda.x;
+        found = true;
+      }
+    }
+    else if (objects[i].type == TYPE_SPHERE)
+    {
+      float dist = intersectSphere(origin, dir, objects[i]);
+      if (dist >= 0.0 && dist < smallest)
+      {
+        info.index = i;
+        smallest = dist;
+        found = true;
+      }
+    }
+  }
+  return found;
+}
+
+vec4 trace(vec3 origin, vec3 dir)
+{
+    hitinfo i;
+    if (intersects(origin, dir, i))
+    {
+        vec4 gray = vec4(i.index / 10.0 + 0.8);
+        return vec4(gray.rgb, 1.0);
+    }
+    return vec4(0.0, 0.0, 0.0, 1.0);
+}
+
+layout (local_size_x = 8, local_size_y = 8) in;
+void main(void)
+{
+    ivec2 pix = ivec2(gl_GlobalInvocationID.xy);
+    ivec2 size = imageSize(framebuffer);
+    if (pix.x >= size.x || pix.y >= size.y)
+    {
+        return;
+    }
+
+    // copied from FpsCamera.cs
+    float aspect = size.x / float(size.y);
+    vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), direction)) * aspect;
+    vec3 up = normalize(cross(direction, right));
+    // PI / 4 = 90°
+    // use 120° for now
+    float fov = PI / 3;
+    float fovAdjust = 1.0 / tan(fov);
+    float xoff = -1.0 + ((float(pix.x) / float(size.x - 1.0)) * 2.0);
+    float yoff = 1.0 - ((float(pix.y) / float(size.y - 1.0)) * 2.0);
+    vec3 dir = direction + (xoff * fovAdjust * right) + (yoff * fovAdjust * up);
+    vec4 color = trace(eye, normalize(dir));
+
+    imageStore(framebuffer, pix, color);
+}

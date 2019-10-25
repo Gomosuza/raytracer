@@ -16,8 +16,8 @@ namespace Raytracer.Backends
         public ComputeShaderRaytracer(
             GraphicsDevice graphicsDevice)
         {
-            _shader = new ComputeShader(graphicsDevice, "Shaders/simple.glslcs");
             _graphicsDevice = graphicsDevice;
+            _shader = new ComputeShader(graphicsDevice, "Shaders/raytracer.glslcs");
         }
 
         public string Name => "Compute shader based raytracer";
@@ -35,6 +35,12 @@ namespace Raytracer.Backends
             // shader will auto. discard anything outside of texture range
             var x = _pow.First(x => x >= renderTarget.Width);
             var y = _pow.First(y => y >= renderTarget.Height);
+
+            var width = renderTarget.Width - 1;
+            var height = renderTarget.Height - 1;
+            // inject parameters
+            _shader.SetParameter("eye", tracingOptions.Camera.Position);
+            _shader.SetParameter("direction", tracingOptions.Camera.Direction);
 
             // hardcoded to chunks of 8x8 in compute shader
             _shader.Execute(x / 8, y / 8, 1);

@@ -26,6 +26,8 @@ namespace Raytracer.Scene.Camera
 
         public Vector3 Position { get; private set; }
 
+        public Vector3 Direction => _direction;
+
         public bool IsDirty { get; private set; }
 
         private Vector3 Up

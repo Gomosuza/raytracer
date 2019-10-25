@@ -6,6 +6,8 @@ namespace Raytracer.Scene.Camera
     {
         Vector3 Position { get; }
 
+        Vector3 Direction { get; }
+
         /// <summary>
         /// Indicates when a camera value has changed.
         /// This usually requires the scene to be redrawn.

@@ -2,15 +2,13 @@
 
 A raytracer built with Monogame and .Net Core.
 
-:warning: WIP
+Realtime compute shader based raytracer with reflections, colored surfaces and soft shadows:
 
-Initial working software tracer with basic reflective surfaces and simple soft shadows:
-
-![software](screenshots/software_v1.png)
+![compute shader](screenshots/computeshader.png)
 
 ___
 
-There are multiple backend implementations that can be swapped out on the fly:
+There are multiple alternative backend implementations that can be swapped out via configuration:
 
 * single-threaded software-based
 * multi-threaded software-based (same logic but makes use of multiple cores)
@@ -22,7 +20,7 @@ Given a resolution it will attempt to hit the configured FPS target (e.g. 60 FPS
 
 This will cause the images to become blurrier until all movement is stopped and it can upscale again.
 
-For CPU based tracing this behaviour can be observed at almost all (decent) resolutions as CPUs aren't powerful enough for realtime raytracing.
+For CPU based tracing this behaviour can be observed at almost all (decent) resolutions (even without soft shadows and reflections) as CPUs aren't powerful enough for realtime raytracing.
 
 # Features
 
@@ -37,6 +35,7 @@ For CPU based tracing this behaviour can be observed at almost all (decent) reso
 TODO:
 
 * multiple surface types
+* textured surfaces
 * GPU-based (vertex/pixel shader)
 * load scene from file
 * GUI overlay to edit configuration values on the fly
@@ -45,7 +44,7 @@ TODO:
 
 # Sources
 
-* [Ray tracing with OpenGL Compute Shaders ](https://github.com/LWJGL/lwjgl3-wiki/wiki/2.6.1.-Ray-tracing-with-OpenGL-Compute-Shaders-%28Part-I%29)
+* [Ray tracing with OpenGL Compute Shaders](https://github.com/LWJGL/lwjgl3-wiki/wiki/2.6.1.-Ray-tracing-with-OpenGL-Compute-Shaders-%28Part-I%29)
 * [Ray tracing in one weekend](http://in1weekend.blogspot.com/2016/01/ray-tracing-in-one-weekend.html)
 * [veldrid-raytracer](https://github.com/mellinoe/veldrid-raytracer)
 * [Paul Bourke](paulbourke.net/miscellaneous/raytracing/)

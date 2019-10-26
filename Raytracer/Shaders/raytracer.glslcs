@@ -30,9 +30,9 @@ const object objects[] =
     // colors from RaytracerGame.cs
     /* floor */
     {TYPE_PLANE, vec3(0, 1, 0), 0, vec3(163 / 255.0, 68 / 255.0, 0)},
-    {TYPE_SPHERE, vec3(0, 1, 0), 1, vec3(54 / 255.0, 210 / 255.0, 21 / 255.0)},
-    {TYPE_SPHERE, vec3(2, 1, 2), 1, vec3(31 / 255.0, 81 / 255.0, 167 / 255.0)},
-    {TYPE_SPHERE, vec3(-2, 0.5, 0), 0.5, vec3(1, 168 / 255.0, 106 / 255.0)},
+    {TYPE_SPHERE, vec3(0, 2, 0), 2, vec3(54 / 255.0, 210 / 255.0, 21 / 255.0)},
+    {TYPE_SPHERE, vec3(3, 2, 0), 1, vec3(31 / 255.0, 81 / 255.0, 167 / 255.0)},
+    {TYPE_SPHERE, vec3(-2, 1.5, -2), 0.75, vec3(1, 168 / 255.0, 106 / 255.0)},
 };
 
 struct Light
@@ -40,6 +40,14 @@ struct Light
     vec3 pos;
     float intensity;
     vec3 color;
+};
+
+struct RaytraceResult
+{
+    vec3 color;
+    vec3 intersectPos;
+    vec3 dir;
+    bool empty;
 };
 
 const Light lights[] =
@@ -184,7 +192,7 @@ vec3 naturalColor(vec3 pos, vec3 normal, int sampleIndex, vec3 surfaceColor)
             if (isInShadow)
                 continue;
         }
-        float illumination = clamp(dot(lightDir, normal), 0, 1);
+        float illumination = clamp(dot(lightDir, normal), 0, FLT_MAX);
         vec3 c = illumination * lights[i].color * lights[i].intensity;
         color += c * diffuse(pos, surfaceColor);
 
@@ -196,7 +204,7 @@ vec3 naturalColor(vec3 pos, vec3 normal, int sampleIndex, vec3 surfaceColor)
     return color / lights.length;
 }
 
-vec3 colorForRay(vec3 origin, vec3 dir, int depth, int sampleIndex)
+RaytraceResult calcForRay(vec3 origin, vec3 dir, int depth, int sampleIndex)
 {
     hitinfo i;
     if (intersects(origin, dir, i))
@@ -205,14 +213,19 @@ vec3 colorForRay(vec3 origin, vec3 dir, int depth, int sampleIndex)
         object o = objects[i.index];
         vec3 color = vec3(0);
         vec3 normal = i.normal;
-        color += naturalColor(intersectPos, normal, sampleIndex, o.color);
+        vec3 cx = o.type == TYPE_SPHERE ? o.color :
+            (int(intersectPos.x) + int(intersectPos.z)) % 2 == 0
+            ? o.color + vec3(0.3, 0.2, 0.1) : o.color;
+        color += naturalColor(intersectPos, normal, sampleIndex, cx);
         if (depth >= reflectionLimit)
         {
-            return color * vec3(0.5);
+            color *= 0.5;
+            return RaytraceResult(color, vec3(0), vec3(0), false);
         }
-        return color;
+        vec3 reflectDir = dir - 2.0 * dot(normal, dir) * normal;
+        return RaytraceResult(color, intersectPos + reflectDir * 0.001, normalize(reflectDir), false);
     }
-    return vec3(0);
+    return RaytraceResult(vec3(0), vec3(0), vec3(0), true);
 }
 
 layout (local_size_x = 8, local_size_y = 8) in;
@@ -236,11 +249,20 @@ void main(void)
 
     dir = normalize(dir);
     vec3 color = vec3(0);
+    int sum = 0;
     for (int i = 0; i < sampleCount; i++)
     {
-        vec3 c = colorForRay(eye, dir, 0, i);
-        color += clamp(c, vec3(0), vec3(1));
+        RaytraceResult result = {vec3(0), eye, dir, false};
+        for (int r = 0; r < reflectionLimit; r++)
+        {
+            result = calcForRay(result.intersectPos, result.dir, r, i);
+            if (result.empty)
+                break;
+
+                sum++;
+            color += clamp(result.color, vec3(0), vec3(1));
+        }
     }
-    color /= sampleCount;
+    color /= sum;
     imageStore(framebuffer, pix, vec4(color, 1));
 }

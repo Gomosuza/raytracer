@@ -38,7 +38,7 @@ namespace Raytracer
             collection.AddSingleton<IGraphicsDeviceManager>(_graphicsDeviceManager);
             collection.AddSingleton<IGraphicsDeviceService>(_graphicsDeviceManager);
             collection.AddSingleton<ITracingOptions, TracingOptions>();
-            collection.AddSingleton<ICamera>(sp => new FpsCamera(GraphicsDevice, sp.GetRequiredService<Settings>(), new Vector3(0, 2, -5f), new Vector3(0, 0, 1)));
+            collection.AddSingleton<ICamera>(sp => new FpsCamera(GraphicsDevice, sp.GetRequiredService<Settings>(), new Vector3(0, 2, -10f), new Vector3(0, 0, 1)));
             collection.AddSingleton(LoadScene());
 
             collection.Scan(scan =>

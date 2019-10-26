@@ -4,6 +4,8 @@ namespace Raytracer.Scene
 {
     public interface ITracingOptions
     {
+        int Fov { get; }
+
         /// <summary>
         /// Max number of reflections a single ray may cast.
         /// Higher count = more realistic at increased computation cost.

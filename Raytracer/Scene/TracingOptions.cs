@@ -12,7 +12,10 @@ namespace Raytracer.Scene
             ReflectionLimit = settings.Scene.ReflectionLimit;
             SampleCount = settings.Scene.SampleCount;
             OnlyRedrawIfDirty = settings.Scene.OnlyRedrawIfDirty;
+            Fov = settings.Scene.Fov;
         }
+
+        public int Fov { get; }
 
         public int ReflectionLimit { get; set; }
 

@@ -5,22 +5,21 @@ layout(binding = 0, rgba32f) uniform image2D framebuffer;
 uniform vec3 eye;
 uniform vec3 direction;
 uniform int sampleCount;
+uniform int fov;
 uniform int reflectionLimit;
 
 struct object
 {
-  int type;
+    int type;
 
-  vec3 min;
-  vec3 max;
-  vec3 pos;
-  float radius;
-  vec3 color;
+    vec3 pos;
+    float radius;
+    vec3 color;
 };
 const float FLT_MAX = 2139095039;
 
 #define TYPE_SPHERE 1
-#define TYPE_BOX 2
+#define TYPE_PLANE 2
 
 #define PI 3.1415926
 
@@ -28,12 +27,12 @@ const float FLT_MAX = 2139095039;
 
 const object objects[] =
 {
-  // colors from RaytracerGame.cs
-  /* floor */
-  {TYPE_BOX, vec3(-5.0, -0.01, -5.0), vec3(5.0, 0.0, 5.0), vec3(0, 0, 0), 0, vec3(163 / 255.0, 68 / 255.0, 0)},
-  {TYPE_BOX, vec3(-0.5, 0.0, -0.5), vec3(0.5, 1.0, 0.5), vec3(0, 0, 0), 0, vec3(54 / 255.0, 210 / 255.0, 21 / 255.0)},
-  {TYPE_SPHERE, vec3(0, 0, 0), vec3(0, 0, 0), vec3(2, 1, 2), 1, vec3(31 / 255.0, 81 / 255.0, 167 / 255.0)},
-  {TYPE_SPHERE, vec3(0, 0, 0), vec3(0, 0, 0), vec3(-1, 0.5, 0), 0.5, vec3(1, 168 / 255.0, 106 / 255.0)},
+    // colors from RaytracerGame.cs
+    /* floor */
+    {TYPE_PLANE, vec3(0, 1, 0), 0, vec3(163 / 255.0, 68 / 255.0, 0)},
+    {TYPE_SPHERE, vec3(0, 1, 0), 1, vec3(54 / 255.0, 210 / 255.0, 21 / 255.0)},
+    {TYPE_SPHERE, vec3(2, 1, 2), 1, vec3(31 / 255.0, 81 / 255.0, 167 / 255.0)},
+    {TYPE_SPHERE, vec3(-2, 0.5, 0), 0.5, vec3(1, 168 / 255.0, 106 / 255.0)},
 };
 
 struct Light
@@ -46,28 +45,40 @@ struct Light
 const Light lights[] =
 {
     {vec3(0, 5, -3), 1, vec3(250 / 255.0, 1, 219 / 255.0)},
-    {vec3(0, 5, -3), 1, vec3(250 / 255.0, 1, 219 / 255.0)},
+    {vec3(0, 5, -3), 1, vec3(250 / 255.0, 1, 219 / 255.0)}
 };
 
 struct hitinfo
 {
-  int index;
-  float distance;
+    int index;
+    float distance;
+    vec3 normal;
 };
 
-vec2 intersectBox(
+float intersectPlane(
         /* ray */
         vec3 origin, vec3 dir,
         /* box */
-        const object b)
+        const object p)
 {
-  vec3 tMin = (b.min - origin) / dir;
-  vec3 tMax = (b.max - origin) / dir;
-  vec3 t1 = min(tMin, tMax);
-  vec3 t2 = max(tMin, tMax);
-  float tNear = max(max(t1.x, t1.y), t1.z);
-  float tFar = min(min(t2.x, t2.y), t2.z);
-  return vec2(tNear, tFar);
+    // abusing similarity of sphere and plane
+    // to store different types of data in same fields
+    vec3 normal = p.pos;
+    float d = p.radius;
+
+    float num = dot(dir, normal);
+    if (num > -0.00001 && num < 0.00001)
+    {
+        return -1;
+    }
+    float dist = (-d - dot(normal, origin)) / num;
+    if (dist < 0)
+    {
+        if (dist < -0.0001)
+            return -1;
+        return 0;
+    }
+    return dist;
 }
 
 float intersectSphere(
@@ -102,33 +113,36 @@ float intersectSphere(
 
 bool intersects(vec3 origin, vec3 dir, out hitinfo info)
 {
-  float smallest = MAX_SCENE_BOUNDS;
-  bool found = false;
-  for (int i = 0; i < objects.length; i++)
-  {
-    if (objects[i].type == TYPE_BOX)
+    float smallest = MAX_SCENE_BOUNDS;
+    bool found = false;
+    for (int i = 0; i < objects.length; i++)
     {
-      vec2 lambda = intersectBox(origin, dir, objects[i]);
-      if (lambda.x > 0.0 && lambda.x < lambda.y && lambda.x < smallest)
-      {
-        info.index = i;
-        smallest = lambda.x;
-        found = true;
-      }
+        if (objects[i].type == TYPE_PLANE)
+        {
+            float d = intersectPlane(origin, dir, objects[i]);
+            if (d >= 0.0 && d < smallest)
+            {
+                info.index = i;
+                info.normal = objects[i].pos;
+                smallest = d;
+                found = true;
+            }
+        }
+        else if (objects[i].type == TYPE_SPHERE)
+        {
+            float dist = intersectSphere(origin, dir, objects[i]);
+            if (dist >= 0.0 && dist < smallest)
+            {
+                info.index = i;
+                vec3 intersectPos = origin + dir * dist;
+                info.normal = normalize(intersectPos - objects[i].pos);
+                smallest = dist;
+                found = true;
+            }
+        }
     }
-    else if (objects[i].type == TYPE_SPHERE)
-    {
-      float dist = intersectSphere(origin, dir, objects[i]);
-      if (dist >= 0.0 && dist < smallest)
-      {
-        info.index = i;
-        smallest = dist;
-        found = true;
-      }
-    }
-  }
-  info.distance = smallest;
-  return found;
+    info.distance = smallest;
+    return found;
 }
 
 vec3 specular(vec3 pos)
@@ -141,12 +155,27 @@ vec3 diffuse(vec3 pos, vec3 surfaceColor)
     return surfaceColor;
 }
 
+float rnd(int state)
+{
+    return fract(sin(state));
+}
+
 vec3 naturalColor(vec3 pos, vec3 normal, int sampleIndex, vec3 surfaceColor)
 {
-    vec3 color = vec3(0.0);
+    vec3 color = vec3(0.01);
     for (int i = 0; i < lights.length; i++)
     {
-        vec3 d = lights[i].pos - pos;
+        vec3 offset = vec3(0);
+        if (sampleIndex > 0)
+        {
+            const float offsetFactor = 0.00001;
+            offset = vec3(
+                -offsetFactor + 2.0 * rnd(sampleIndex),
+                -offsetFactor + 2.0 * rnd(sampleIndex >> 3),
+                -offsetFactor + 2.0 * rnd(sampleIndex << 3)
+            );
+        }
+        vec3 d = lights[i].pos + offset - pos;
         vec3 lightDir = normalize(d);
         hitinfo ix;
         if (intersects(pos + lightDir * 0.001, lightDir, ix))
@@ -155,7 +184,7 @@ vec3 naturalColor(vec3 pos, vec3 normal, int sampleIndex, vec3 surfaceColor)
             if (isInShadow)
                 continue;
         }
-        float illumination = clamp(dot(lightDir, normal), 0, FLT_MAX);
+        float illumination = clamp(dot(lightDir, normal), 0, 1);
         vec3 c = illumination * lights[i].color * lights[i].intensity;
         color += c * diffuse(pos, surfaceColor);
 
@@ -164,7 +193,7 @@ vec3 naturalColor(vec3 pos, vec3 normal, int sampleIndex, vec3 surfaceColor)
         float spec = illumination;
         color += spec * c * pow(spec, shininess) * specular(pos);
     }
-    return color;
+    return color / lights.length;
 }
 
 vec3 colorForRay(vec3 origin, vec3 dir, int depth, int sampleIndex)
@@ -174,17 +203,9 @@ vec3 colorForRay(vec3 origin, vec3 dir, int depth, int sampleIndex)
     {
         vec3 intersectPos = origin + dir * i.distance;
         object o = objects[i.index];
-        vec3 color = vec3(o.color);
-        vec3 normal = vec3(0);
-        if (o.type == TYPE_BOX)
-        {
-            normal = vec3(0, 0, -1);
-        }
-        else if (o.type == TYPE_SPHERE)
-        {
-            normal = normalize(intersectPos - o.pos);
-        }
-        color += naturalColor(intersectPos, normal, sampleIndex, color);
+        vec3 color = vec3(0);
+        vec3 normal = i.normal;
+        color += naturalColor(intersectPos, normal, sampleIndex, o.color);
         if (depth >= reflectionLimit)
         {
             return color * vec3(0.5);
@@ -208,10 +229,7 @@ void main(void)
     float aspect = size.x / float(size.y);
     vec3 right = normalize(cross(vec3(0.0, 1.0, 0.0), direction)) * aspect;
     vec3 up = normalize(cross(direction, right));
-    // PI / 4 = 90°
-    // use 120° for now
-    float fov = PI / 3;
-    float fovAdjust = 1.0 / tan(fov);
+    float fovAdjust = 1.0 / tan(fov / 2.0 * (PI / 180.0));
     float xoff = -1.0 + ((float(pix.x) / float(size.x - 1.0)) * 2.0);
     float yoff = 1.0 - ((float(pix.y) / float(size.y - 1.0)) * 2.0);
     vec3 dir = direction + (xoff * fovAdjust * right) + (yoff * fovAdjust * up);

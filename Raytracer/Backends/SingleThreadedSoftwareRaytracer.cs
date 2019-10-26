@@ -12,7 +12,6 @@ namespace Raytracer.Backends
             GraphicsDevice graphicsDevice)
             : base(graphicsDevice)
         {
-
         }
 
         public override string Name => "Single-threaded software raytracer";

@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Raytracer.Configuration;
+using System;
 
 namespace Raytracer.Scene.Camera
 {
@@ -46,7 +47,8 @@ namespace Raytracer.Scene.Camera
             // but -1 y is down in world space but up in raster space
             var scalarOffsetY = 1f - y / (float)height * 2f;
 
-            var dir = _direction + scalarOffsetX * Right + scalarOffsetY * Up;
+            float fovAdjust = 1f / (float)Math.Tan((160 - fov) * Math.PI / 180f);
+            var dir = _direction + scalarOffsetX * Right * fovAdjust + scalarOffsetY * Up * fovAdjust;
             dir.Normalize();
             return new Ray(Position, dir);
         }

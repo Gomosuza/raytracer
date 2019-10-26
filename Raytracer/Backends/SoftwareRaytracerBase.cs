@@ -114,7 +114,7 @@ namespace Raytracer.Backends
                 var specular = MathHelper.Clamp(Vector3.Dot(lightDir, intersectionNormal), 0, float.MaxValue);
                 color += specular * c * (float)Math.Pow(specular, surface.Shininess) * surface.Specular(position);
             }
-            return color;
+            return color / tracingOptions.Scene.Lights.Count;
         }
 
         private Intersection? CheckIntersection(Ray ray, IScene scene)

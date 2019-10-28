@@ -1,6 +1,6 @@
-# C# Raytracer
+# C#/Compute Shader Raytracer
 
-A raytracer built with Monogame and .Net Core.
+A raytracer built with Monogame and .Net Core. Also includes a custom compute shader extension I wrote for monogame!
 
 Realtime compute shader based raytracer with reflections, colored surfaces and soft shadows:
 
@@ -10,9 +10,9 @@ ___
 
 There are multiple alternative backend implementations that can be swapped out via configuration:
 
-* single-threaded software-based
-* multi-threaded software-based (same logic but makes use of multiple cores)
 * compute shader based (using the [MonoGame Core](https://www.nuget.org/packages/MonoGame.Framework.DesktopGL.Core) fork)
+* single-threaded software-based
+* multi-threaded software-based (same logic as single-threaded but makes use of multiple cores)
 
 Each implementation uses the same logic to determine resolution:
 
@@ -25,8 +25,11 @@ For CPU based tracing this behaviour can be observed at almost all (decent) reso
 # Features
 
 * configuration options (currently limited to file/command line based at startup)
-* simple reflective colored surfaces
+* simple reflective colored & checkerboard surfaces
 * hard/soft shadows (`sampleCount` = 1 for hard, larger number for softer shadows)
+* configurable reflection depth limit (0 = no reflections)
+* player movement (WASD + mouse, configurable)
+* sphere movement in scene
 
 # Known issues
 

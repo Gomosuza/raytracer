@@ -271,7 +271,7 @@ void main(void)
     for (int i = 0; i < sampleCount; i++)
     {
         RaytraceResult result = {vec3(0), eye, dir, false};
-        for (int r = 0; r < reflectionLimit; r++)
+        for (int r = 0; r < reflectionLimit + 1; r++)
         {
             result = calcForRay(result.intersectPos, result.dir, r, i);
             if (result.empty)

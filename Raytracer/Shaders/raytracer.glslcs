@@ -24,8 +24,6 @@ const float FLT_MAX = 2139095039;
 
 #define PI 3.1415926
 
-#define MAX_SCENE_BOUNDS 100.0
-
 const object objects[] =
 {
     // colors from RaytracerGame.cs
@@ -34,6 +32,7 @@ const object objects[] =
     {TYPE_SPHERE, vec3(0, 2, 0), 2, vec3(54 / 255.0, 210 / 255.0, 21 / 255.0)},
     {TYPE_SPHERE, vec3(3, 2, 0), 1, vec3(31 / 255.0, 81 / 255.0, 167 / 255.0)},
     {TYPE_SPHERE, vec3(-2, 1.5, -2), 0.75, vec3(1, 168 / 255.0, 106 / 255.0)},
+    {TYPE_SPHERE, vec3(-4, 1.5, -4), 1, vec3(1, 168 / 255.0, 106 / 255.0)}
 };
 
 struct Light
@@ -67,14 +66,9 @@ struct hitinfo
 float intersectPlane(
         /* ray */
         vec3 origin, vec3 dir,
-        /* box */
-        const object p)
+        /* plane */
+        vec3 normal, float d)
 {
-    // abusing similarity of sphere and plane
-    // to store different types of data in same fields
-    vec3 normal = p.pos;
-    float d = p.radius;
-
     float num = dot(dir, normal);
     if (num > -0.00001 && num < 0.00001)
     {
@@ -94,11 +88,11 @@ float intersectSphere(
         /* ray */
         vec3 origin, vec3 dir,
         /* sphere */
-        object s)
+        vec3 pos, float radius)
 {
-    vec3 v = s.pos - origin;
+    vec3 v = pos - origin;
     float lenSq = v.x*v.x + v.y*v.y + v.z*v.z;
-    float rSq = s.radius * s.radius;
+    float rSq = radius * radius;
     if (lenSq < rSq)
     {
         // inside sphere
@@ -122,13 +116,17 @@ float intersectSphere(
 
 bool intersects(vec3 origin, vec3 dir, out hitinfo info)
 {
-    float smallest = MAX_SCENE_BOUNDS;
+    float smallest = FLT_MAX;
     bool found = false;
     for (int i = 0; i < objects.length; i++)
     {
         if (objects[i].type == TYPE_PLANE)
         {
-            float d = intersectPlane(origin, dir, objects[i]);
+            // abusing similarity of sphere and plane
+            // to store different types of data in same fields
+            vec3 normal = objects[i].pos;
+            float planeD = objects[i].radius;
+            float d = intersectPlane(origin, dir, normal, planeD);
             if (d >= 0.0 && d < smallest)
             {
                 info.index = i;
@@ -139,12 +137,31 @@ bool intersects(vec3 origin, vec3 dir, out hitinfo info)
         }
         else if (objects[i].type == TYPE_SPHERE)
         {
-            float dist = intersectSphere(origin, dir, objects[i]);
+            vec3 pos = objects[i].pos;
+            // HACKY way to get movement going..
+            if (i == 4)
+            {
+                // rotate around center
+                float period = 0.1;
+                float c = cos(pos.x * PI * time * period);
+                float s = sin(pos.z * PI * time * period);
+                pos.xz = vec2(c * pos.x - s * pos.z, s * pos.x + c * pos.z);
+            }
+            else
+            {
+                // bob up and down
+                float amplitude = (i * 0.7) / i;
+                // don't want sphere in center (idx 1) to move at all
+                float period = (1 - i) * 0.45;
+                float offset = sin(PI * time * period) * amplitude;
+                pos.y += offset;
+            }
+            float dist = intersectSphere(origin, dir, pos, objects[i].radius);
             if (dist >= 0.0 && dist < smallest)
             {
                 info.index = i;
                 vec3 intersectPos = origin + dir * dist;
-                info.normal = normalize(intersectPos - objects[i].pos);
+                info.normal = normalize(intersectPos - pos);
                 smallest = dist;
                 found = true;
             }

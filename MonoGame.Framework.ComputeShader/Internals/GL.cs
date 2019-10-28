@@ -181,6 +181,12 @@ namespace MonoGame.Framework.ComputeShader.Internals
         public static void SetUniform1i(uint parameterId, int i)
             => setUniform1i(parameterId, i);
 
+        [UnmanagedFunctionPointer(CallConv)]
+        public delegate void SetUniform1fDelegate(uint parameterId, float f);
+        private static SetUniform1fDelegate setUniform1f = LoadFunction<SetUniform1fDelegate>("glUniform1f");
+        public static void SetUniform1f(uint parameterId, float f)
+            => setUniform1f(parameterId, f);
+
         private static T LoadFunction<T>(string function)
         {
             var ret = GetProcAddress(function);

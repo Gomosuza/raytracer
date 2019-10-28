@@ -87,6 +87,13 @@ namespace MonoGame.Framework.ComputeShader
             CheckGLError();
         }
 
+        public void SetParameter(string name, float f)
+        {
+            var p = GL.GetUniformLocation(_program, name);
+            GL.SetUniform1f(p, f);
+            CheckGLError();
+        }
+
         /// <summary>
         /// Must be called before execution.
         /// Sets up the rendertarget as the target of the compute shader.

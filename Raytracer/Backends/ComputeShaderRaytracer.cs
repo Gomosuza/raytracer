@@ -44,6 +44,7 @@ namespace Raytracer.Backends
             _shader.SetParameter("sampleCount", tracingOptions.SampleCount);
             _shader.SetParameter("reflectionLimit", tracingOptions.ReflectionLimit);
             _shader.SetParameter("fov", tracingOptions.Fov);
+            _shader.SetParameter("time", (float)gameTime.TotalGameTime.TotalSeconds);
 
             // hardcoded to chunks of 8x8 in compute shader
             _shader.Execute(x / 8, y / 8, 1);

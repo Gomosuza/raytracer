@@ -7,6 +7,7 @@ uniform vec3 direction;
 uniform int sampleCount;
 uniform int fov;
 uniform int reflectionLimit;
+uniform float time;
 
 struct object
 {

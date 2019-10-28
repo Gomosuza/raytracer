@@ -50,5 +50,5 @@ TODO:
 * [Ray tracing with OpenGL Compute Shaders](https://github.com/LWJGL/lwjgl3-wiki/wiki/2.6.1.-Ray-tracing-with-OpenGL-Compute-Shaders-%28Part-I%29)
 * [Ray tracing in one weekend](http://in1weekend.blogspot.com/2016/01/ray-tracing-in-one-weekend.html)
 * [veldrid-raytracer](https://github.com/mellinoe/veldrid-raytracer)
-* [Paul Bourke](paulbourke.net/miscellaneous/raytracing/)
+* [Paul Bourke](http://paulbourke.net/miscellaneous/raytracing/)
 * [An Introduction to Compute Shaders](http://antongerdelan.net/opengl/compute.html)

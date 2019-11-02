@@ -6,6 +6,7 @@ Realtime compute shader based raytracer with reflections, colored surfaces and s
 
 ![compute shader](screenshots/computeshader.png)
 
+[![Raytracer](https://dev.azure.com/marcstanlive/Opensource/_apis/build/status/44)](https://dev.azure.com/marcstanlive/Opensource/_build/definition?definitionId=44)
 ___
 
 There are multiple alternative backend implementations that can be swapped out via configuration:

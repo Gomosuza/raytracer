@@ -6,6 +6,15 @@ trigger:
   branches:
     include:
     - master
+schedules:
+- cron: "0 17 * * Fri"
+  always: true
+  displayName: Weekly build
+  branches:
+    include:
+    - master
+variables:
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
 
 pool:
   vmImage: 'windows-latest'

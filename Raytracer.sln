@@ -5,7 +5,7 @@ VisualStudioVersion = 16.0.29319.158
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Raytracer", "Raytracer\Raytracer.csproj", "{981D0D00-0594-4DE7-A63D-27DE4714B397}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Framework.ComputeShader", "MonoGame.Framework.ComputeShader\MonoGame.Framework.ComputeShader.csproj", "{4E8DB74A-474C-4BCF-AC61-12A4E88E3867}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonoGame.Framework.ComputeShader", "MonoGame.Framework.ComputeShader\MonoGame.Framework.ComputeShader\MonoGame.Framework.ComputeShader.csproj", "{53A7B535-A1B3-4C43-A3B8-B86A7529E902}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +17,10 @@ Global
 		{981D0D00-0594-4DE7-A63D-27DE4714B397}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{981D0D00-0594-4DE7-A63D-27DE4714B397}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{981D0D00-0594-4DE7-A63D-27DE4714B397}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4E8DB74A-474C-4BCF-AC61-12A4E88E3867}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4E8DB74A-474C-4BCF-AC61-12A4E88E3867}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4E8DB74A-474C-4BCF-AC61-12A4E88E3867}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4E8DB74A-474C-4BCF-AC61-12A4E88E3867}.Release|Any CPU.Build.0 = Release|Any CPU
+		{53A7B535-A1B3-4C43-A3B8-B86A7529E902}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{53A7B535-A1B3-4C43-A3B8-B86A7529E902}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{53A7B535-A1B3-4C43-A3B8-B86A7529E902}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{53A7B535-A1B3-4C43-A3B8-B86A7529E902}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

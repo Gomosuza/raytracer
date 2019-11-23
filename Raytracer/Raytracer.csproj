@@ -18,7 +18,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\MonoGame.Framework.ComputeShader\MonoGame.Framework.ComputeShader.csproj" />
+    <ProjectReference Include="..\MonoGame.Framework.ComputeShader\MonoGame.Framework.ComputeShader\MonoGame.Framework.ComputeShader.csproj" />
   </ItemGroup>
 
   <ItemGroup>

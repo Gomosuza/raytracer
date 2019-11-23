@@ -49,10 +49,8 @@ For CPU based tracing this behaviour can be observed at almost all (decent) reso
 * purple screen when using compute shader on mobile chipsets (Intel Graphics 6xx and the likes). The shader simply doesn't run/output anything resulting in the default texture color (purple) being shown
 * AccessViolationException on linkProgram on mobile chipsets (Intel Graphis 6xx and the likes)
 
-TODO:
+# possible future TODOs:
 
-* multiple surface types
-* textured surfaces
 * GPU-based (vertex/pixel shader)
 * load scene from file
 * GUI overlay to edit configuration values on the fly

@@ -9,6 +9,18 @@ Realtime compute shader based raytracer with reflections, colored surfaces and s
 [![Raytracer](https://dev.azure.com/marcstanlive/Opensource/_apis/build/status/44)](https://dev.azure.com/marcstanlive/Opensource/_build/definition?definitionId=44)
 ___
 
+# Setup
+
+The compute shader implementation is now in its [own repository](https://github.com/MarcStan/monogame-framework-computeshader) and referenced via a git submodule. Therefore you must run:
+
+```
+git submodule init && git submodule update
+```
+
+after checkout to build the solution successfully.
+
+# Details
+
 There are multiple alternative backend implementations that can be swapped out via configuration:
 
 * compute shader based (using the [MonoGame Core](https://www.nuget.org/packages/MonoGame.Framework.DesktopGL.Core) fork)

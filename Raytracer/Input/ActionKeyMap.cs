@@ -33,6 +33,8 @@ namespace Raytracer.Input
         }
 
         public bool IsPressed(string action)
-            => _settings.Keybindings.ActionKeyMap[action].Any(_currentState.IsKeyDown);
+            =>
+            _settings.Keybindings.ActionKeyMap.ContainsKey(action.ToLowerInvariant()) &&
+            _settings.Keybindings.ActionKeyMap[action.ToLowerInvariant()].Any(_currentState.IsKeyDown);
     }
 }

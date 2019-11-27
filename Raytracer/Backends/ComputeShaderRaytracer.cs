@@ -17,7 +17,7 @@ namespace Raytracer.Backends
             GraphicsDevice graphicsDevice)
         {
             _graphicsDevice = graphicsDevice;
-            _shader = new ComputeShader(graphicsDevice, "Shaders/raytracer.glslcs");
+            _shader = new ComputeShader(graphicsDevice, "Shaders/raytracer.glsl");
         }
 
         public string Name => "Compute shader based raytracer";

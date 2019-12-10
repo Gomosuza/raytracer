@@ -81,7 +81,7 @@ namespace Raytracer.Backends
             // https://en.wikipedia.org/wiki/Blinn%E2%80%93Phong_shading_model
 
             // use minimal ambient
-            var color = new Vector3(0.01f);
+            var color = new Vector3(0.2f);
             foreach (var light in tracingOptions.Scene.Lights)
             {
                 var offset = Vector3.Zero;

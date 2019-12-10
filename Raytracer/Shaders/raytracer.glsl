@@ -188,7 +188,7 @@ float rnd(int state)
 
 vec3 naturalColor(vec3 pos, vec3 normal, int sampleIndex, vec3 surfaceColor)
 {
-    vec3 color = vec3(0.01);
+    vec3 color = vec3(0.2);
     for (int i = 0; i < lights.length; i++)
     {
         vec3 offset = vec3(0);
@@ -214,7 +214,7 @@ vec3 naturalColor(vec3 pos, vec3 normal, int sampleIndex, vec3 surfaceColor)
         vec3 c = illumination * lights[i].color * lights[i].intensity;
         color += c * diffuse(pos, surfaceColor);
 
-        float shininess = 200;
+        float shininess = 0.4545;
         // TODO: bug in C# code?
         float spec = illumination;
         color += spec * c * pow(spec, shininess) * specular(pos);

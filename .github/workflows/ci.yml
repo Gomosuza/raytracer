@@ -1,0 +1,18 @@
+on: push
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 3.1.100
+    - name: build
+      run: dotnet build -c Release
+    - name: publish
+      run: dotnet publish -c Release --no-build Raytracer/Raytracer.csproj -o output/Raytracer
+    - uses: actions/upload-artifact@v1
+      with:
+        name: Raytracer
+        path: output
